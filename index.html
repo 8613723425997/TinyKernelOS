@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TinyKernelOS - 轻量级自制操作系统</title>
+    <!-- 添加 Supabase 库 -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,6 +63,48 @@
             margin-top: 10px;
         }
 
+        /* 新增：认证表单样式 */
+        .auth-form {
+            margin: 10px 0;
+        }
+
+            .auth-form input {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            .auth-form button {
+                background-color: #0066cc;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 10px;
+            }
+
+                .auth-form button:hover {
+                    background-color: #0052a3;
+                }
+
+        .auth-message {
+            color: #d9534f;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -81,6 +125,42 @@
         <a href="#docs">文档</a>
     </nav>
 
+    <!-- 用户认证区域 -->
+    <section id="auth">
+        <h2>用户账户</h2>
+
+        <!-- 注册表单 -->
+        <div id="register-section">
+            <h3>注册账号</h3>
+            <div class="auth-form">
+                <input type="email" id="register-email" placeholder="邮箱地址">
+                <input type="password" id="register-password" placeholder="密码（至少6位）">
+                <button onclick="register()">注册</button>
+                <p id="register-message" class="auth-message"></p>
+            </div>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="login-section">
+            <h3>登录账号</h3>
+            <div class="auth-form">
+                <input type="email" id="login-email" placeholder="邮箱地址">
+                <input type="password" id="login-password" placeholder="密码">
+                <button onclick="login()">登录</button>
+                <p id="login-message" class="auth-message"></p>
+            </div>
+        </div>
+
+        <!-- 用户信息（登录后显示） -->
+        <div id="user-section" style="display:none;">
+            <div class="user-info">
+                <h3>欢迎回来！</h3>
+                <p>邮箱：<span id="user-email"></span></p>
+                <button onclick="logout()" style="background-color: #dc3545;">退出登录</button>
+            </div>
+        </div>
+    </section>
+
     <section id="home">
         <h2>欢迎使用 TinyKernelOS</h2>
         <p>TinyKernelOS 是一个完全自主开发的轻量级操作系统，包含现代化的安装程序(OOBE)和用户界面。</p>
@@ -90,24 +170,126 @@
     <section id="features">
         <h2>系统特性</h2>
         <ul>
-            <li> 自定义内核架构</li>
-            <li> 图形化安装程序 (Installer)</li>
-            <li> 现代化 OOBE 设置体验</li>
-            <li> 高效资源管理</li>
-            <li> 持续开发中...</li>
+            <li>✅ 自定义内核架构</li>
+            <li>✅ 图形化安装程序 (Installer)</li>
+            <li>✅ 现代化 OOBE 设置体验</li>
+            <li>✅ 高效资源管理</li>
+            <li>🔄 持续开发中...</li>
         </ul>
     </section>
 
     <section id="download">
         <h2>下载 TinyKernelOS</h2>
         <p>ISO 镜像文件即将发布！</p>
-        <!-- 当ISO准备好后，取消下一行的注释 -->
-        <!-- <a href="#" class="download-btn">下载 ISO 镜像</a> -->
         <p><small>发布日期: 敬请期待</small></p>
     </section>
 
     <footer>
         <p>© 2026 TinyKernelOS 项目 | 开源驱动创新</p>
     </footer>
+
+    <script>
+        // 初始化 Supabase（使用你的密钥）
+        const supabaseUrl = 'https://jjmgqfbavfntizfxlpbv.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbWdxZmJhdmZudGl6ZnhscGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTY1NTIsImV4cCI6MjA3MjgzMjU1Mn0.z_zMJAs_S5gqUp6nKUKV8eEkmCpybuMTHeyGwBFCl7E'
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+        // 注册功能
+        async function register() {
+            const email = document.getElementById('register-email').value
+            const password = document.getElementById('register-password').value
+
+            // 简单验证
+            if (!email || !password) {
+                document.getElementById('register-message').textContent = '请填写邮箱和密码'
+                return
+            }
+
+            if (password.length < 6) {
+                document.getElementById('register-message').textContent = '密码至少需要6位'
+                return
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password
+            })
+
+            if (error) {
+                document.getElementById('register-message').textContent = error.message
+            } else {
+                document.getElementById('register-message').textContent = '注册成功！请检查邮箱验证'
+                // 清空表单
+                document.getElementById('register-email').value = ''
+                document.getElementById('register-password').value = ''
+            }
+        }
+
+        // 登录功能
+        async function login() {
+            const email = document.getElementById('login-email').value
+            const password = document.getElementById('login-password').value
+
+            if (!email || !password) {
+                document.getElementById('login-message').textContent = '请填写邮箱和密码'
+                return
+            }
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            })
+
+            if (error) {
+                document.getElementById('login-message').textContent = error.message
+            } else {
+                // 登录成功，更新UI
+                updateUIAfterLogin(data.user)
+            }
+        }
+
+        // 退出登录
+        async function logout() {
+            await supabase.auth.signOut()
+            updateUIAfterLogout()
+        }
+
+        // 更新登录后的UI
+        function updateUIAfterLogin(user) {
+            document.getElementById('user-email').textContent = user.email
+            document.getElementById('login-section').style.display = 'none'
+            document.getElementById('register-section').style.display = 'none'
+            document.getElementById('user-section').style.display = 'block'
+
+            // 清空表单和消息
+            document.getElementById('login-email').value = ''
+            document.getElementById('login-password').value = ''
+            document.getElementById('login-message').textContent = ''
+            document.getElementById('register-message').textContent = ''
+        }
+
+        // 更新退出登录后的UI
+        function updateUIAfterLogout() {
+            document.getElementById('login-section').style.display = 'block'
+            document.getElementById('register-section').style.display = 'block'
+            document.getElementById('user-section').style.display = 'none'
+        }
+
+        // 检查登录状态（页面加载时）
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                updateUIAfterLogin(session.user)
+            }
+        })
+
+        // 监听认证状态变化
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                updateUIAfterLogin(session.user)
+            } else if (event === 'SIGNED_OUT') {
+                updateUIAfterLogout()
+            }
+        })
+    </script>
 </body>
 </html>
