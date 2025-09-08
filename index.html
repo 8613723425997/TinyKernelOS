@@ -3,232 +3,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TinyKernelOS - 轻量级自制操作系统</title>
-    <!-- 添加 Supabase 库 -->
+    <title>TinyKernelOS - 登录</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            overflow: hidden;
+            position: relative;
+            background: #000;
         }
 
-        header {
+        /* 高级科技感背景 */
+        .cyber-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, #000000 0%, #14213d 30%, #1a1a2e 60%, #0d0d0d 100%);
+            z-index: -3;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(66, 153, 225, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(66, 153, 225, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(50px) translateX(50px); }
+        }
+
+        .cyber-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(66, 153, 225, 0.4) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .cyber-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(66, 153, 225, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
-
-        h1 {
-            color: #0066cc;
-        }
-
+        
         .logo {
-            font-size: 2.5em;
+            font-size: 2.8em;
             font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4299e1, #9f7aea, #4299e1);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
         }
 
-        nav {
-            background-color: #0066cc;
-            padding: 10px;
-            border-radius: 5px;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: #e2e8f0;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+        }
+        
+        .auth-card {
+            background: rgba(26, 32, 44, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(66, 153, 225, 0.3);
+            box-shadow: 
+                0 0 50px rgba(66, 153, 225, 0.2),
+                0 0 100px rgba(102, 126, 234, 0.1);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(66, 153, 225, 0.3);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: #a0aec0;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab.active {
+            color: #4299e1;
+            border-bottom-color: #4299e1;
+            text-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(66, 153, 225, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(45, 55, 72, 0.5);
+            color: #e2e8f0;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 20px rgba(66, 153, 225, 0.3);
+            background: rgba(45, 55, 72, 0.8);
+        }
+        
+        .form-group input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .remember-me input {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #4299e1;
+        }
+        
+        .remember-me label {
+            margin: 0;
+            cursor: pointer;
+            color: #e2e8f0;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(66, 153, 225, 0.4);
+        }
+        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .login-btn:hover::before {
+            left: 100%;
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(66, 153, 225, 0.6);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .auth-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        
+        .error {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ea868f;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+        
+        .success {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #7cc;
+            border-color: rgba(40, 167, 69, 0.3);
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 32, 44, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #4299e1;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* 系统内容区域 */
+        .system-content {
+            display: none;
+            background: rgba(26, 32, 44, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(66, 153, 225, 0.3);
+            box-shadow: 
+                0 0 50px rgba(66, 153, 225, 0.2),
+                0 0 100px rgba(102, 126, 234, 0.1);
+            margin-top: 20px;
+        }
+
+        .system-header {
+            text-align: center;
             margin-bottom: 30px;
         }
 
-            nav a {
-                color: white;
-                text-decoration: none;
-                margin: 0 15px;
-                font-weight: bold;
-            }
-
-        section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .download-btn {
-            display: inline-block;
-            background-color: #28a745;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        /* 认证表单样式 */
-        .auth-form {
-            margin: 10px 0;
-        }
-
-            .auth-form input {
-                display: block;
-                width: 100%;
-                padding: 10px;
-                margin: 8px 0;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                box-sizing: border-box;
-            }
-
-            .auth-form button {
-                background-color: #0066cc;
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                margin-top: 10px;
-            }
-
-                .auth-form button:hover {
-                    background-color: #0052a3;
-                }
-
-        .auth-message {
-            color: #d9534f;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .user-info {
-            background-color: #e7f3ff;
-            padding: 15px;
-            border-radius: 5px;
+        .system-features {
             margin: 20px 0;
         }
 
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #666;
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(45, 55, 72, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #4299e1;
+            color: #e2e8f0;
         }
 
-        /* 新增：保护内容的样式 */
-        .protected-content {
-            display: none;
+        .feature-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #4299e1;
         }
 
-        .login-required {
-            text-align: center;
-            padding: 40px;
-            background-color: #fff3cd;
+        .logout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 12px;
+            border: none;
             border-radius: 8px;
-            border: 1px solid #ffeaa7;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(220, 53, 69, 0.6);
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">TinyKernelOS</div>
-        <p>轻量、高效、自研的操作系统解决方案</p>
-    </header>
-
-    <!-- 用户认证区域 - 始终显示 -->
-    <section id="auth">
-        <h2>用户账户</h2>
-
-        <!-- 登录表单 -->
-        <div id="login-section">
-            <h3>登录账号</h3>
-            <div class="auth-form">
-                <input type="email" id="login-email" placeholder="邮箱地址">
-                <input type="password" id="login-password" placeholder="密码">
-                <button onclick="login()">登录</button>
-                <p id="login-message" class="auth-message"></p>
+    <!-- 高级背景元素 -->
+    <div class="cyber-background"></div>
+    <div class="cyber-grid"></div>
+    <div class="cyber-glow"></div>
+    <div class="cyber-particles" id="particles"></div>
+    
+    <div class="container">
+        <!-- 登录界面 -->
+        <div id="login-container">
+            <div class="header">
+                <div class="logo">TinyKernelOS</div>
+                <div class="subtitle">轻量、高效、自研的操作系统解决方案</div>
+            </div>
+            
+            <div class="auth-card">
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                
+                <div class="auth-tabs">
+                    <div class="auth-tab active" onclick="showLogin()">登录</div>
+                    <div class="auth-tab" onclick="showRegister()">注册</div>
+                </div>
+                
+                <div id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">邮箱地址</label>
+                        <input type="email" id="login-email" placeholder="请输入您的邮箱" value="black3809432511@icloud.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <input type="password" id="login-password" placeholder="请输入密码">
+                    </div>
+                    
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me">
+                        <label for="remember-me">记住我</label>
+                    </div>
+                    
+                    <button class="login-btn" id="login-button" onclick="handleLogin()">
+                        <span id="login-text">登录</span>
+                        <span id="login-spinner" class="loading-spinner" style="display: none;"></span>
+                    </button>
+                    <div id="login-message" class="auth-message"></div>
+                </div>
+                
+                <div id="register-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="register-email">邮箱地址</label>
+                        <input type="email" id="register-email" placeholder="请输入您的邮箱">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" placeholder="至少6位字符">
+                    </div>
+                    
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me-register" checked>
+                        <label for="remember-me-register">记住我</label>
+                    </div>
+                    
+                    <button class="login-btn" id="register-button" onclick="handleRegister()">
+                        <span id="register-text">注册账号</span>
+                        <span id="register-spinner" class="loading-spinner" style="display: none;"></span>
+                    </button>
+                    <div id="register-message" class="auth-message"></div>
+                </div>
             </div>
         </div>
 
-        <!-- 注册表单 -->
-        <div id="register-section">
-            <h3>注册账号</h3>
-            <div class="auth-form">
-                <input type="email" id="register-email" placeholder="邮箱地址">
-                <input type="password" id="register-password" placeholder="密码（至少6位）">
-                <button onclick="register()">注册</button>
-                <p id="register-message" class="auth-message"></p>
+        <!-- 系统内容界面（登录后显示） -->
+        <div id="system-container" class="system-content" style="display: none;">
+            <div class="system-header">
+                <div class="logo">TinyKernelOS</div>
+                <div class="subtitle">欢迎回来！</div>
             </div>
-        </div>
 
-        <!-- 用户信息（登录后显示） -->
-        <div id="user-section" style="display:none;">
             <div class="user-info">
-                <h3>欢迎回来！</h3>
-                <p>邮箱：<span id="user-email"></span></p>
-                <button onclick="logout()" style="background-color: #dc3545;">退出登录</button>
+                <p>登录邮箱：<strong id="user-email-display"></strong></p>
             </div>
+
+            <div class="system-features">
+                <h3 style="color: #e2e8f0; margin-bottom: 20px;">系统特性</h3>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>自定义内核架构</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>图形化安装程序 (Installer)</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>现代化 OOBE 设置体验</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>高效资源管理</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔄</span>
+                    <span>持续开发中...</span>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <h3 style="color: #e2e8f0; margin-bottom: 15px;">下载 TinyKernelOS</h3>
+                <p style="color: #a0aec0;">ISO 镜像文件即将发布！</p>
+                <p style="color: #a0aec0; font-size: 0.9em;">发布日期: 敬请期待</p>
+                <button class="login-btn" style="margin-top: 15px;">下载体验版</button>
+            </div>
+
+            <button class="logout-btn" onclick="handleLogout()">退出登录</button>
         </div>
-    </section>
-
-    <!-- 登录提示 -->
-    <div id="login-required-message" class="login-required">
-        <h2>请登录以访问 TinyKernelOS 内容</h2>
-        <p>您需要登录账户才能查看系统详情和下载资源</p>
     </div>
-
-    <!-- 受保护的内容区域 -->
-    <div id="protected-content" class="protected-content">
-        <nav>
-            <a href="#home">首页</a>
-            <a href="#features">特性</a>
-            <a href="#download">下载</a>
-            <a href="#docs">文档</a>
-        </nav>
-
-        <section id="home">
-            <h2>欢迎使用 TinyKernelOS</h2>
-            <p>TinyKernelOS 是一个完全自主开发的轻量级操作系统，包含现代化的安装程序(OOBE)和用户界面。</p>
-            <p>版本: <strong>26.0</strong> | 架构: <strong>x64</strong></p>
-        </section>
-
-        <section id="features">
-            <h2>系统特性</h2>
-            <ul>
-                <li>✅ 自定义内核架构</li>
-                <li>✅ 图形化安装程序 (Installer)</li>
-                <li>✅ 现代化 OOBE 设置体验</li>
-                <li>✅ 高效资源管理</li>
-                <li>🔄 持续开发中...</li>
-            </ul>
-        </section>
-
-        <section id="download">
-            <h2>下载 TinyKernelOS</h2>
-            <p>ISO 镜像文件即将发布！</p>
-            <p><small>发布日期: 敬请期待</small></p>
-            <a href="#" class="download-btn">下载体验版</a>
-        </section>
-
-        <section id="docs">
-            <h2>开发文档</h2>
-            <p>访问我们的GitHub仓库获取最新开发文档和源代码：</p>
-            <p><a href="https://github.com/8613723425997/TinyKernelOS" target="_blank">https://github.com/8613723425997/TinyKernelOS</a></p>
-        </section>
-    </div>
-
-    <footer>
-        <p>© 2026 TinyKernelOS 项目 | 开源驱动创新</p>
-    </footer>
 
     <script>
-        // 使用全局变量确保可访问性
         let supabaseClient = null;
+        let isProcessing = false;
 
-        // 等待页面和Supabase库加载完成
-        window.addEventListener('load', function () {
-            initializeSupabase();
-        });
+        // 创建粒子背景
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 4 + 1 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = Math.random() * 4 + 4 + 's';
+                container.appendChild(particle);
+            }
+        }
 
+        // 初始化Supabase - 使用您提供的正确密钥
         function initializeSupabase() {
             try {
-                // 初始化 Supabase
+                // 使用您提供的正确 Supabase 配置
                 const supabaseUrl = 'https://jjmgqfbavfntizfxlpbv.supabase.co';
                 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbWdxZmJhdmZudGl6ZnhscGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTY1NTIsImV4cCI6MjA3MjgzMjU1Mn0.z_zMJAs_S5gqUp6nKUKV8eEkmCpybuMTHeyGwBFCl7E';
 
@@ -237,35 +532,141 @@
                     console.log('Supabase 初始化成功');
                     checkAuthState();
                 } else {
-                    console.error('Supabase 库未加载');
-                    document.getElementById('register-message').textContent = '系统加载失败，请刷新页面';
-                    document.getElementById('login-message').textContent = '系统加载失败，请刷新页面';
+                    showError('login-message', 'Supabase 库加载失败，请刷新页面');
                 }
             } catch (error) {
                 console.error('初始化错误:', error);
+                showError('login-message', '系统初始化失败');
+            }
+        }
+
+        // 显示系统内容
+        function showSystemContent(user) {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('system-container').style.display = 'block';
+            document.getElementById('user-email-display').textContent = user.email;
+        }
+
+        // 显示登录界面
+        function showLoginForm() {
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('system-container').style.display = 'none';
+        }
+
+        // 设置加载状态
+        function setLoading(loading) {
+            isProcessing = loading;
+            const overlay = document.getElementById('loading-overlay');
+            const loginBtn = document.getElementById('login-button');
+            const registerBtn = document.getElementById('register-button');
+            const loginSpinner = document.getElementById('login-spinner');
+            const registerSpinner = document.getElementById('register-spinner');
+            const loginText = document.getElementById('login-text');
+            const registerText = document.getElementById('register-text');
+            
+            if (loading) {
+                overlay.style.display = 'flex';
+                loginBtn.disabled = true;
+                registerBtn.disabled = true;
+                loginSpinner.style.display = 'inline-block';
+                registerSpinner.style.display = 'inline-block';
+                loginText.textContent = '登录中...';
+                registerText.textContent = '注册中...';
+            } else {
+                overlay.style.display = 'none';
+                loginBtn.disabled = false;
+                registerBtn.disabled = false;
+                loginSpinner.style.display = 'none';
+                registerSpinner.style.display = 'none';
+                loginText.textContent = '登录';
+                registerText.textContent = '注册账号';
+            }
+        }
+
+        // 显示错误消息
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'auth-message error';
+            element.style.display = 'block';
+        }
+
+        // 显示成功消息
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'auth-message success';
+            element.style.display = 'block';
+        }
+
+        // 隐藏消息
+        function hideMessage(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'none';
+        }
+
+        // 登录功能
+        async function handleLogin() {
+            if (isProcessing) return;
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const remember = document.getElementById('remember-me').checked;
+
+            if (!email || !password) {
+                showError('login-message', '请填写邮箱和密码');
+                return;
+            }
+
+            setLoading(true);
+            hideMessage('login-message');
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    showError('login-message', '登录失败: ' + error.message);
+                } else {
+                    showSuccess('login-message', '登录成功！');
+                    // 保存账户信息
+                    if (remember) {
+                        localStorage.setItem('remembered_email', email);
+                    }
+                    // 显示系统内容
+                    setTimeout(() => {
+                        showSystemContent(data.user);
+                    }, 1000);
+                }
+            } catch (error) {
+                showError('login-message', '网络错误，请重试');
+            } finally {
+                setLoading(false);
             }
         }
 
         // 注册功能
-        async function register() {
-            if (!supabaseClient) {
-                document.getElementById('register-message').textContent = '系统初始化中，请稍后...';
-                return;
-            }
-
+        async function handleRegister() {
+            if (isProcessing) return;
+            
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
+            const remember = document.getElementById('remember-me-register').checked;
 
-            // 简单验证
             if (!email || !password) {
-                document.getElementById('register-message').textContent = '请填写邮箱和密码';
+                showError('register-message', '请填写邮箱和密码');
                 return;
             }
 
             if (password.length < 6) {
-                document.getElementById('register-message').textContent = '密码至少需要6位';
+                showError('register-message', '密码至少需要6位');
                 return;
             }
+
+            setLoading(true);
+            hideMessage('register-message');
 
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
@@ -277,110 +678,79 @@
                 });
 
                 if (error) {
-                    document.getElementById('register-message').textContent = '错误: ' + error.message;
+                    showError('register-message', '注册失败: ' + error.message);
                 } else {
-                    document.getElementById('register-message').textContent = '注册成功！请检查邮箱验证（包括垃圾邮件）';
+                    showSuccess('register-message', '注册成功！请检查邮箱验证邮件（包括垃圾邮件）');
+                    // 保存账户信息
+                    if (remember) {
+                        localStorage.setItem('remembered_email', email);
+                    }
                     // 清空表单
                     document.getElementById('register-email').value = '';
                     document.getElementById('register-password').value = '';
                 }
             } catch (error) {
-                document.getElementById('register-message').textContent = '网络错误，请重试';
-            }
-        }
-
-        // 登录功能
-        async function login() {
-            if (!supabaseClient) {
-                document.getElementById('login-message').textContent = '系统初始化中，请稍后...';
-                return;
-            }
-
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            if (!email || !password) {
-                document.getElementById('login-message').textContent = '请填写邮箱和密码';
-                return;
-            }
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) {
-                    document.getElementById('login-message').textContent = '错误: ' + error.message;
-                } else {
-                    updateUIAfterLogin(data.user);
-                }
-            } catch (error) {
-                document.getElementById('login-message').textContent = '网络错误，请重试';
+                showError('register-message', '网络错误，请重试');
+            } finally {
+                setLoading(false);
             }
         }
 
         // 退出登录
-        async function logout() {
+        async function handleLogout() {
             if (supabaseClient) {
                 await supabaseClient.auth.signOut();
             }
-            updateUIAfterLogout();
+            showLoginForm();
+            showSuccess('login-message', '已成功退出登录');
         }
 
-        // 检查登录状态
+        // 表单切换
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            document.querySelectorAll('.auth-tab')[1].classList.remove('active');
+            hideMessage('login-message');
+            hideMessage('register-message');
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.querySelectorAll('.auth-tab')[0].classList.remove('active');
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+            hideMessage('login-message');
+            hideMessage('register-message');
+        }
+
+        // 检查认证状态
         async function checkAuthState() {
             if (!supabaseClient) return;
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
-                    updateUIAfterLogin(session.user);
+                    // 自动显示系统内容
+                    showSystemContent(session.user);
+                } else {
+                    // 检查是否有记住的邮箱
+                    const rememberedEmail = localStorage.getItem('remembered_email');
+                    if (rememberedEmail) {
+                        document.getElementById('login-email').value = rememberedEmail;
+                        document.getElementById('remember-me').checked = true;
+                    }
                 }
             } catch (error) {
                 console.error('检查登录状态错误:', error);
             }
         }
 
-        // 更新登录后的UI
-        function updateUIAfterLogin(user) {
-            document.getElementById('user-email').textContent = user.email;
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('register-section').style.display = 'none';
-            document.getElementById('user-section').style.display = 'block';
-
-            // 显示受保护的内容，隐藏登录提示
-            document.getElementById('protected-content').style.display = 'block';
-            document.getElementById('login-required-message').style.display = 'none';
-
-            // 清空表单和消息
-            document.getElementById('login-email').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-message').textContent = '';
-            document.getElementById('register-message').textContent = '';
-        }
-
-        // 更新退出登录后的UI
-        function updateUIAfterLogout() {
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('register-section').style.display = 'block';
-            document.getElementById('user-section').style.display = 'none';
-
-            // 隐藏受保护的内容，显示登录提示
-            document.getElementById('protected-content').style.display = 'none';
-            document.getElementById('login-required-message').style.display = 'block';
-        }
-
-        // 监听认证状态变化
-        if (supabaseClient) {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    updateUIAfterLogin(session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    updateUIAfterLogout();
-                }
-            });
-        }
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            createParticles();
+            initializeSupabase();
+        });
     </script>
 </body>
 </html>
