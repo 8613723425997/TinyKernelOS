@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TinyKernelOS - 登录</title>
+    <title>TinyKernelOS - 轻量自研操作系统</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -379,6 +380,15 @@
             transform: translateY(-2px);
             box-shadow: 0 0 30px rgba(220, 53, 69, 0.6);
         }
+
+        /* 页脚样式 */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #a0aec0;
+            font-size: 0.9em;
+            padding: 15px;
+        }
     </style>
 </head>
 <body>
@@ -497,6 +507,12 @@
             </div>
 
             <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>© 2026 TinyKernelOS Project. 所有权利保留。</p>
+            <p>采用 Visual Studio 2022 和现代C++开发</p>
         </div>
     </div>
 
@@ -705,7 +721,7 @@
             showSuccess('login-message', '已成功退出登录');
         }
 
-        // 表单切换
+        // 表单切换 - 修复了点击切换功能
         function showLogin() {
             document.getElementById('login-form').style.display = 'block';
             document.getElementById('register-form').style.display = 'none';
