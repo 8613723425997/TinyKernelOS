@@ -189,107 +189,161 @@
     </footer>
 
     <script>
-        // 初始化 Supabase（使用你的密钥）
-        const supabaseUrl = 'https://jjmgqfbavfntizfxlpbv.supabase.co'
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbWdxZmJhdmZudGl6ZnhscGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTY1NTIsImV4cCI6MjA3MjgzMjU1Mn0.z_zMJAs_S5gqUp6nKUKV8eEkmCpybuMTHeyGwBFCl7E'
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+        // 使用全局变量确保可访问性
+        let supabaseClient = null;
+
+        // 等待页面和Supabase库加载完成
+        window.addEventListener('load', function () {
+            initializeSupabase();
+        });
+
+        function initializeSupabase() {
+            try {
+                // 初始化 Supabase
+                const supabaseUrl = 'https://jjmgqfbavfntizfxlpbv.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbWdxZmJhdmZudGl6ZnhscGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTY1NTIsImV4cCI6MjA3MjgzMjU1Mn0.z_zMJAs_S5gqUp6nKUKV8eEkmCpybuMTHeyGwBFCl7E';
+
+                if (typeof supabase !== 'undefined') {
+                    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                    console.log('Supabase 初始化成功');
+                    checkAuthState();
+                } else {
+                    console.error('Supabase 库未加载');
+                    document.getElementById('register-message').textContent = '系统加载失败，请刷新页面';
+                    document.getElementById('login-message').textContent = '系统加载失败，请刷新页面';
+                }
+            } catch (error) {
+                console.error('初始化错误:', error);
+            }
+        }
 
         // 注册功能
         async function register() {
-            const email = document.getElementById('register-email').value
-            const password = document.getElementById('register-password').value
+            if (!supabaseClient) {
+                document.getElementById('register-message').textContent = '系统初始化中，请稍后...';
+                return;
+            }
+
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
 
             // 简单验证
             if (!email || !password) {
-                document.getElementById('register-message').textContent = '请填写邮箱和密码'
-                return
+                document.getElementById('register-message').textContent = '请填写邮箱和密码';
+                return;
             }
 
             if (password.length < 6) {
-                document.getElementById('register-message').textContent = '密码至少需要6位'
-                return
+                document.getElementById('register-message').textContent = '密码至少需要6位';
+                return;
             }
 
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password
-            })
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin
+                    }
+                });
 
-            if (error) {
-                document.getElementById('register-message').textContent = error.message
-            } else {
-                document.getElementById('register-message').textContent = '注册成功！请检查邮箱验证'
-                // 清空表单
-                document.getElementById('register-email').value = ''
-                document.getElementById('register-password').value = ''
+                if (error) {
+                    document.getElementById('register-message').textContent = '错误: ' + error.message;
+                } else {
+                    document.getElementById('register-message').textContent = '注册成功！请检查邮箱验证（包括垃圾邮件）';
+                    // 清空表单
+                    document.getElementById('register-email').value = '';
+                    document.getElementById('register-password').value = '';
+                }
+            } catch (error) {
+                document.getElementById('register-message').textContent = '网络错误，请重试';
             }
         }
 
         // 登录功能
         async function login() {
-            const email = document.getElementById('login-email').value
-            const password = document.getElementById('login-password').value
-
-            if (!email || !password) {
-                document.getElementById('login-message').textContent = '请填写邮箱和密码'
-                return
+            if (!supabaseClient) {
+                document.getElementById('login-message').textContent = '系统初始化中，请稍后...';
+                return;
             }
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            })
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
 
-            if (error) {
-                document.getElementById('login-message').textContent = error.message
-            } else {
-                // 登录成功，更新UI
-                updateUIAfterLogin(data.user)
+            if (!email || !password) {
+                document.getElementById('login-message').textContent = '请填写邮箱和密码';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    document.getElementById('login-message').textContent = '错误: ' + error.message;
+                } else {
+                    updateUIAfterLogin(data.user);
+                }
+            } catch (error) {
+                document.getElementById('login-message').textContent = '网络错误，请重试';
             }
         }
 
         // 退出登录
         async function logout() {
-            await supabase.auth.signOut()
-            updateUIAfterLogout()
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            updateUIAfterLogout();
+        }
+
+        // 检查登录状态
+        async function checkAuthState() {
+            if (!supabaseClient) return;
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    updateUIAfterLogin(session.user);
+                }
+            } catch (error) {
+                console.error('检查登录状态错误:', error);
+            }
         }
 
         // 更新登录后的UI
         function updateUIAfterLogin(user) {
-            document.getElementById('user-email').textContent = user.email
-            document.getElementById('login-section').style.display = 'none'
-            document.getElementById('register-section').style.display = 'none'
-            document.getElementById('user-section').style.display = 'block'
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('register-section').style.display = 'none';
+            document.getElementById('user-section').style.display = 'block';
 
             // 清空表单和消息
-            document.getElementById('login-email').value = ''
-            document.getElementById('login-password').value = ''
-            document.getElementById('login-message').textContent = ''
-            document.getElementById('register-message').textContent = ''
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('register-message').textContent = '';
         }
 
         // 更新退出登录后的UI
         function updateUIAfterLogout() {
-            document.getElementById('login-section').style.display = 'block'
-            document.getElementById('register-section').style.display = 'block'
-            document.getElementById('user-section').style.display = 'none'
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('register-section').style.display = 'block';
+            document.getElementById('user-section').style.display = 'none';
         }
 
-        // 检查登录状态（页面加载时）
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                updateUIAfterLogin(session.user)
-            }
-        })
-
         // 监听认证状态变化
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-                updateUIAfterLogin(session.user)
-            } else if (event === 'SIGNED_OUT') {
-                updateUIAfterLogout()
-            }
-        })
+        if (supabaseClient) {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    updateUIAfterLogin(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    updateUIAfterLogout();
+                }
+            });
+        }
     </script>
 </body>
 </html>
