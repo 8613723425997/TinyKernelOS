@@ -63,7 +63,7 @@
             margin-top: 10px;
         }
 
-        /* 新增：认证表单样式 */
+        /* 认证表单样式 */
         .auth-form {
             margin: 10px 0;
         }
@@ -110,6 +110,19 @@
             margin-top: 40px;
             color: #666;
         }
+
+        /* 新增：保护内容的样式 */
+        .protected-content {
+            display: none;
+        }
+
+        .login-required {
+            text-align: center;
+            padding: 40px;
+            background-color: #fff3cd;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        }
     </style>
 </head>
 <body>
@@ -118,27 +131,9 @@
         <p>轻量、高效、自研的操作系统解决方案</p>
     </header>
 
-    <nav>
-        <a href="#home">首页</a>
-        <a href="#features">特性</a>
-        <a href="#download">下载</a>
-        <a href="#docs">文档</a>
-    </nav>
-
-    <!-- 用户认证区域 -->
+    <!-- 用户认证区域 - 始终显示 -->
     <section id="auth">
         <h2>用户账户</h2>
-
-        <!-- 注册表单 -->
-        <div id="register-section">
-            <h3>注册账号</h3>
-            <div class="auth-form">
-                <input type="email" id="register-email" placeholder="邮箱地址">
-                <input type="password" id="register-password" placeholder="密码（至少6位）">
-                <button onclick="register()">注册</button>
-                <p id="register-message" class="auth-message"></p>
-            </div>
-        </div>
 
         <!-- 登录表单 -->
         <div id="login-section">
@@ -148,6 +143,17 @@
                 <input type="password" id="login-password" placeholder="密码">
                 <button onclick="login()">登录</button>
                 <p id="login-message" class="auth-message"></p>
+            </div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="register-section">
+            <h3>注册账号</h3>
+            <div class="auth-form">
+                <input type="email" id="register-email" placeholder="邮箱地址">
+                <input type="password" id="register-password" placeholder="密码（至少6位）">
+                <button onclick="register()">注册</button>
+                <p id="register-message" class="auth-message"></p>
             </div>
         </div>
 
@@ -161,28 +167,51 @@
         </div>
     </section>
 
-    <section id="home">
-        <h2>欢迎使用 TinyKernelOS</h2>
-        <p>TinyKernelOS 是一个完全自主开发的轻量级操作系统，包含现代化的安装程序(OOBE)和用户界面。</p>
-        <p>版本: <strong>26.0</strong> | 架构: <strong>x64</strong></p>
-    </section>
+    <!-- 登录提示 -->
+    <div id="login-required-message" class="login-required">
+        <h2>请登录以访问 TinyKernelOS 内容</h2>
+        <p>您需要登录账户才能查看系统详情和下载资源</p>
+    </div>
 
-    <section id="features">
-        <h2>系统特性</h2>
-        <ul>
-            <li>✅ 自定义内核架构</li>
-            <li>✅ 图形化安装程序 (Installer)</li>
-            <li>✅ 现代化 OOBE 设置体验</li>
-            <li>✅ 高效资源管理</li>
-            <li>🔄 持续开发中...</li>
-        </ul>
-    </section>
+    <!-- 受保护的内容区域 -->
+    <div id="protected-content" class="protected-content">
+        <nav>
+            <a href="#home">首页</a>
+            <a href="#features">特性</a>
+            <a href="#download">下载</a>
+            <a href="#docs">文档</a>
+        </nav>
 
-    <section id="download">
-        <h2>下载 TinyKernelOS</h2>
-        <p>ISO 镜像文件即将发布！</p>
-        <p><small>发布日期: 敬请期待</small></p>
-    </section>
+        <section id="home">
+            <h2>欢迎使用 TinyKernelOS</h2>
+            <p>TinyKernelOS 是一个完全自主开发的轻量级操作系统，包含现代化的安装程序(OOBE)和用户界面。</p>
+            <p>版本: <strong>26.0</strong> | 架构: <strong>x64</strong></p>
+        </section>
+
+        <section id="features">
+            <h2>系统特性</h2>
+            <ul>
+                <li>✅ 自定义内核架构</li>
+                <li>✅ 图形化安装程序 (Installer)</li>
+                <li>✅ 现代化 OOBE 设置体验</li>
+                <li>✅ 高效资源管理</li>
+                <li>🔄 持续开发中...</li>
+            </ul>
+        </section>
+
+        <section id="download">
+            <h2>下载 TinyKernelOS</h2>
+            <p>ISO 镜像文件即将发布！</p>
+            <p><small>发布日期: 敬请期待</small></p>
+            <a href="#" class="download-btn">下载体验版</a>
+        </section>
+
+        <section id="docs">
+            <h2>开发文档</h2>
+            <p>访问我们的GitHub仓库获取最新开发文档和源代码：</p>
+            <p><a href="https://github.com/8613723425997/TinyKernelOS" target="_blank">https://github.com/8613723425997/TinyKernelOS</a></p>
+        </section>
+    </div>
 
     <footer>
         <p>© 2026 TinyKernelOS 项目 | 开源驱动创新</p>
@@ -320,6 +349,10 @@
             document.getElementById('register-section').style.display = 'none';
             document.getElementById('user-section').style.display = 'block';
 
+            // 显示受保护的内容，隐藏登录提示
+            document.getElementById('protected-content').style.display = 'block';
+            document.getElementById('login-required-message').style.display = 'none';
+
             // 清空表单和消息
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
@@ -332,6 +365,10 @@
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('register-section').style.display = 'block';
             document.getElementById('user-section').style.display = 'none';
+
+            // 隐藏受保护的内容，显示登录提示
+            document.getElementById('protected-content').style.display = 'none';
+            document.getElementById('login-required-message').style.display = 'block';
         }
 
         // 监听认证状态变化
